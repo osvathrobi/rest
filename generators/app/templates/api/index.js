@@ -1,10 +1,13 @@
 import { Router } from 'express'
-<%_ if (generateAuthApi) { _%>
+<%_ if (generateAuthApi && ((!useCupinviteAuth) || (authMethods.length>0))) { _%>
 import user from './user'
 import auth from './auth'
 <%_ } _%>
 <%_ if (typeof passwordReset !== 'undefined' && passwordReset) { _%>
 import passwordReset from './password-reset'
+<%_ } _%>
+<%_ if (useCupinviteAuth) { _%>
+import stat from './stat'
 <%_ } _%>
 
 const router = new Router()
@@ -32,12 +35,16 @@ const router = new Router()
  * @apiParam {String[]} [sort=-createdAt] Order of returned items.
  * @apiParam {String[]} [fields] Fields to be returned.
  */
-<%_ if (generateAuthApi) { _%>
+<%_ if (generateAuthApi && ((!useCupinviteAuth) || (authMethods.length>0))) { _%>
 router.use('/users', user)
 router.use('/auth', auth)
 <%_ } _%>
 <%_ if (typeof passwordReset !== 'undefined' && passwordReset) { _%>
 router.use('/password-resets', passwordReset)
+<%_ } _%>
+
+<%_ if (useCupinviteAuth) { _%>
+router.use('/stats', stat)
 <%_ } _%>
 
 export default router

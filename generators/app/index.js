@@ -10,7 +10,7 @@ module.exports = yeoman.Base.extend({
     var that = this;
     // Have Yeoman greet the user.
     this.log(yosay(
-      'Welcome to the slick ' + chalk.red('generator-rest') + ' generator!'
+      'Welcome to the slick ' + chalk.red('generator-rest-ci') + ' generator!'
     ));
 
     return this.prompt([{
@@ -41,16 +41,21 @@ module.exports = yeoman.Base.extend({
       message: 'Do you want to generate authentication API?',
       default: true
     }, {
+      type: 'confirm',
+      name: 'useCupinviteAuth',
+      message: 'Do you want to generate and use cupinvite authentication?',
+      default: true
+    }, {
       type: 'checkbox',
       name: 'authMethods',
-      message: 'Which types of authentication do you want to enable?',
-      default: ['password'],
+      message: 'Which types of additional authentication do you want to enable?',
+      default: [],
       choices: [
         'password',
         'facebook',
         'github',
         'google',
-        {name: 'twitter', disabled: 'Soon - PRs are welcome (see: https://github.com/diegohaz/generator-rest/issues/8)'}
+        //{name: 'twitter', disabled: 'Soon - PRs are welcome (see: https://github.com/diegohaz/generator-rest/issues/8)'}
       ],
       when: function (props) {
         return props.generateAuthApi;
@@ -130,8 +135,15 @@ module.exports = yeoman.Base.extend({
 
     if (props.generateAuthApi) {
       copyTpl(tPath('services/passport'), dPath(props.srcDir + '/services/passport'), props);
-      copyTpl(tPath('services/jwt'), dPath(props.srcDir + '/services/jwt'), props);
-      copyTpl(tPath('api/user'), dPath(props.srcDir + '/' + props.apiDir + '/user'), props);
+
+      if((!props.useCupinviteAuth) || (props.authMethods.length>0)) {
+        copyTpl(tPath('services/jwt'), dPath(props.srcDir + '/services/jwt'), props);
+        copyTpl(tPath('api/user'), dPath(props.srcDir + '/' + props.apiDir + '/user'), props);
+      }
+
+      if(props.useCupinviteAuth) {
+        copyTpl(tPath('api/stat'), dPath(props.srcDir + '/' + props.apiDir + '/stat'), props);
+      }
 
       if (props.authMethods.length) {
         copyTpl(tPath('api/auth'), dPath(props.srcDir + '/' + props.apiDir + '/auth'), props);

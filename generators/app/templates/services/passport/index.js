@@ -9,7 +9,10 @@ import { jwtSecret, masterKey } from '../../config'
 <%_ authServices.forEach(function (service) { _%>
 import * as <%= service %>Service from '../<%= service %>'
 <%_ }) _%>
+
+<%_ if (generateAuthApi && ((!useCupinviteAuth) || (authMethods.length>0))) { _%>
 import User<% if (passwordSignup) { %>, { schema }<% } %> from '../../<%= apiDir %>/user/model'
+<%_ } _%>
 
 <%_ if (passwordSignup) { _%>
 export const password = () => (req, res, next) =>
@@ -93,8 +96,17 @@ passport.use('token', new JwtStrategy({
     ExtractJwt.fromAuthHeaderWithScheme('Bearer')
   ])
 }, ({ id }, done) => {
-  User.findById(id).then((user) => {
-    done(null, user)
-    return null
-  }).catch(done)
+  <%_ if (useCupinviteAuth) { _%>
+    //console.log('Verified token payload: ', payload);
+  done(false, {
+    id: payload.id,
+    role: payload.role,
+    organization: payload.organization
+  })
+  <%_ } else { _%>
+    User.findById(id).then((user) => {
+      done(null, user)
+      return null
+    }).catch(done)
+  <%_ } _%>
 }))
